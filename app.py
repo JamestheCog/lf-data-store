@@ -25,8 +25,9 @@ def post_information():
         cursor.execute(f'INSERT INTO "Patient Information" ({", ".join(column_names)}) VALUES ({", ".join(["?"] * len(column_names))})',
                        tuple([data[i] for i in column_names]))
         conn.close()
+        return(jsonify({'status' : 200}), 200)
     except Exception as e:
-        return(jsonify({'error' : str(e)})), 400
+        return(jsonify({'error' : str(e)}), 400)
 
 @app.route('/get_information', methods = ['GET'])
 def get_information():
@@ -58,5 +59,6 @@ def update_information():
         data = dict(zip(column_names, list(request.get_json().values())))
         cursor.execute(f'UPDATE "Patient Information" SET {", ".join([i + " = " + data[i] for i in list(data.keys())[3:]])} WHERE {", ".join([i + " = " + data[i] for i in list(data.keys())[:3]])}')
         cursor.commit() ; conn.close()
+        return(jsonify({'status' : 200}), 200)
     except Exception as e:
         return(jsonify({'error' : str(e)})), 400
