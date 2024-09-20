@@ -27,6 +27,7 @@ CREATE Table "Patient Information" (
 	"famcare_inclusion"			TEXT,
 	"famcare_manage_symp"		TEXT,
 	"famcare_give_info"			TEXT,
+	"famcare_tests"				TEXT,
 	"famcare_thorough_acc"		TEXT,
 	"famcare_follow_up"			TEXT,
 	"famcare_avail_pat"			TEXT,
