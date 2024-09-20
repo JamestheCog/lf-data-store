@@ -40,10 +40,10 @@ def get_information():
         retrieved_data, column_names = cursor.fetchall(), [i[0] for i in cursor.execute('SELECT * FROM "Patient Information" LIMIT 1').description]
         retrieved_data = [dict(zip(tuple(column_names), i)) for i in retrieved_data]
         for i in retrieved_data:
-            print(i)
-            i['patient_name'], i['patient_nric'], i['proxy_name'] = [funcs.decrypt(i[j], os.getenv('FERNET_KEY')) for j in ['patient_name', 'patient_nric', 'proxy_name']]
+            i['patient_name'], i['patient_nric'], i['proxy_name'] = [funcs.decrypt(i[j].encode('utf-8'), os.getenv('FERNET_KEY')) for j in ['patient_name', 'patient_nric', 'proxy_name']]
         conn.close() ; return(jsonify(retrieved_data), 200)
     except Exception as e:
+        print(e)
         return(jsonify({'error' : str(e)}), 500)
     except sqlite3.Error as e:
         print(str(e))
