@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from dotenv import load_dotenv
-import os, sqlite3
+import os, sqlite3, base64
 
 # User modules:
 from utils import funcs 
@@ -31,7 +31,7 @@ def post_information():
 
 @app.route('/get_information', methods = ['GET'])
 def get_information():
-    try:
+    '''try:
         data = request.get_json() 
         if data['password'] != os.getenv('DB_PASSWORD') or data.get('password') is None:
             return({'error' : 'bad password; did you key it in correctly?'})
@@ -43,10 +43,20 @@ def get_information():
             i['patient_name'], i['patient_nric'], i['proxy_name'] = [funcs.decrypt(i[j].encode('utf-8'), os.getenv('FERNET_KEY')) for j in ['patient_name', 'patient_nric', 'proxy_name']]
         conn.close() ; return(jsonify(retrieved_data), 200)
     except Exception as e:
-        print(e)
         return(jsonify({'error' : str(e)}), 500)
     except sqlite3.Error as e:
         print(str(e))
+    '''
+    data = request.get_json() 
+    if data['password'] != os.getenv('DB_PASSWORD') or data.get('password') is None:
+        return({'error' : 'bad password; did you key it in correctly?'})
+    conn = sqlite3.connect('./db/data.db') ; cursor = conn.cursor()
+    cursor.execute('SELECT * FROM "Patient Information"')
+    retrieved_data, column_names = cursor.fetchall(), [i[0] for i in cursor.execute('SELECT * FROM "Patient Information" LIMIT 1').description]
+    retrieved_data = [dict(zip(tuple(column_names), i)) for i in retrieved_data]
+    for i in retrieved_data:
+        i['patient_name'], i['patient_nric'], i['proxy_name'] = [funcs.decrypt(i[j], os.getenv('FERNET_KEY')) for j in ['patient_name', 'patient_nric', 'proxy_name']]
+    conn.close() ; return(jsonify(retrieved_data), 200)
 
 @app.route('/update_information', methods = ['PATCH'])
 def update_information():
