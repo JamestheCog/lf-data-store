@@ -16,8 +16,8 @@ def fetch_data(access_key, fernet_key):
     try:
         if access_key != os.getenv('ACCESS_KEY'):
             return({'status' : 403, 'message' : 'incorrect / missing access key'})
-        elif fernet_key != os.getenv('FERNET_KEY'):
-            return({'status' : 403, 'message' : 'incorrect / missing fernet key'})
+        elif fernet_key != os.getenv('ENCRYPTION_KEY'):
+            return({'status' : 403, 'message' : 'incorrect / missing encryption key'})
         conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) ; conn.execute(f'USE DATABASE lf_project_store')
         cursor = conn.cursor() ; cursor.execute('SELECT * FROM "Patient Information"')
         results, colnames = cursor.fetchall(), [i[0].lower() for i in cursor.execute('SELECT * FROM "Patient Information" LIMIT 1').description]
