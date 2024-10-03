@@ -36,7 +36,7 @@ def post_information():
         conn = sqlite3.connect('./db/data.db') ; cursor = conn.cursor() 
         colnames = [i[0] for i in cursor.execute('SELECT * FROM "Patient Information" LIMIT 1').description]
         enc_data = tuple([funcs.encrypt(data[i], os.getenv('FERNET_KEY')) for i in colnames])
-        cursor.execute(f'INSERT INTO "Patient Information" ({", ".join(colnames)}) VALUES ({", ".join(["?"] * (len(data) - 1))})', enc_data) 
+        cursor.execute(f'INSERT INTO "Patient Information" ({", ".join(colnames)}) VALUES ({", ".join(["?"] * len(enc_data))})', enc_data) 
         conn.commit() ; conn.close()
         return(jsonify({'status' : 200, 'message' : 'data successfully inserted'}), 200)
     except (Exception, sqlite3.Error) as e:
@@ -56,7 +56,7 @@ def update_information():
             return(jsonify({'status' : 400, 'message' : 'too little parameters to update'}), 400)
         conn = sqlite3.connect('./db/data.db') ; cursor = conn.cursor()
         colnames, values = [i for i in list(data.keys()) if i != 'access_key'], [str(i) for i in list(data.values())[1:]]
-        data = dict(zip(colnames, values)) #[funcs.encrypt(data[i], os.getenv('FERNET_KEY')) for i in colnames]
+        data = dict(zip(colnames, values))
 
         # Find the appropriate ROWID here:
         cursor.execute('SELECT ROWID, patient_name, patient_nric FROM "Patient Information"') ; fetched = cursor.fetchall()
