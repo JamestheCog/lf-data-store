@@ -6,7 +6,8 @@ to make things more readable.
 
 from flask import Blueprint, request, jsonify
 from dotenv import load_dotenv
-from utils import funcs, db
+from utils import funcs
+from utils import db as db_funcs
 import os, sqlite3
 
 db = Blueprint('db', __name__)
@@ -19,7 +20,7 @@ def fetch_information():
     return an error and do not return any data.
     '''
     data = request.get_json()
-    results, code = db.fetch_data(data['access_key'], data['fernet_key'])
+    results, code = db_funcs.fetch_data(data['access_key'], data['fernet_key'])
     return(jsonify(results), code)
 
 @db.route('/post_information', methods = ['POST'])
