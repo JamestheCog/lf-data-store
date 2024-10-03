@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.register_blueprint(db)
 app.register_blueprint(dashboard)
 
-## Error handling in the application (meant for when somebody access the applications):
+## Error handling in the application (meant for when somebody accesses the application):
 @app.errorhandler(403)
 def forbidden_access(e):
     return(render_template('./errors/page-403.html', e = e), 403)

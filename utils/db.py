@@ -2,8 +2,7 @@
 A module for storing functions and other constants (if need be) for fetching data from our database:
 '''
 
-import os, sqlite3
-from utils import funcs
+import os, sqlitecloud
 
 def fetch_data(access_key, fernet_key):
     '''
@@ -19,9 +18,10 @@ def fetch_data(access_key, fernet_key):
             return({'status' : 403, 'message' : 'incorrect / missing access key'})
         elif fernet_key != os.getenv('FERNET_KEY'):
             return({'status' : 403, 'message' : 'incorrect / missing fernet key'})
-        conn = sqlite3.connect('./db/data.db') ; cursor = conn.cursor() ; cursor.execute('SELECT * FROM "Patient Information"')
+        conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) ; conn.execute(f'USE DATABASE lf_project_store')
+        cursor = conn.cursor() ; cursor.execute('SELECT * FROM "Patient Information"')
         results, colnames = cursor.fetchall(), [i[0].lower() for i in cursor.execute('SELECT * FROM "Patient Information" LIMIT 1').description]
-        results = [tuple(map(lambda x : funcs.decrypt(x, fernet_key), i)) for i in results] ; conn.close()
+        conn.close()
         return([dict(zip(colnames, i)) for i in results], 200)
-    except (Exception, sqlite3.Error) as e:
+    except (Exception, sqlitecloud.Error) as e:
         return({'status' : 500, 'message' : str(e)}, 500)
