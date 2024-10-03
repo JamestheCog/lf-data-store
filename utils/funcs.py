@@ -3,7 +3,6 @@ Contains helper functions for manipulating data.
 '''
 
 from cryptography.fernet import Fernet
-import base64
 
 def encrypt(string, key):
     '''
@@ -16,7 +15,6 @@ def decrypt(enc_string, key):
     '''
     Given an encoded string, decode it:
     '''
-    print(key)
     fernet = Fernet(key.encode())
     return(fernet.decrypt(enc_string.encode()).decode('utf-8'))
     
