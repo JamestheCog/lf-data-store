@@ -19,7 +19,7 @@ def fetch_information():
     return an error and do not return any data.
     '''
     data = request.get_json()
-    results, code = db_funcs.fetch_data(data['access_key'], data['fernet_key'])
+    results, code = db_funcs.fetch_data(data['access_key'], data['encryption_key'])
     return(jsonify(results), code)
 
 @db.route('/post_information', methods = ['POST'])
@@ -32,7 +32,9 @@ def post_information():
         data = request.get_json()
         if data.get('access_key') is None or data.get('access_key') != os.getenv('ACCESS_KEY'):
             return(jsonify({'status_code' : 403, 'message' : 'incorrect / missing access key'}), 403)
-        conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) ; conn.execute('USE DATABASE lf_project_store') ; cursor = conn.cursor() 
+        conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) 
+        conn.execute('USE DATABASE lf_project_store') 
+        cursor = conn.cursor() 
         colnames = [i[0] for i in cursor.execute('SELECT * FROM "Patient Information" LIMIT 1').description]
         enc_data = tuple([data[i] for i in colnames])
         cursor.execute(f'INSERT INTO "Patient Information" ({", ".join(colnames)}) VALUES ({", ".join(["?"] * len(enc_data))})', enc_data) 
@@ -53,7 +55,9 @@ def update_information():
             return(jsonify({'status' : 403, 'message' : 'incorrect / missing access key'}), 403)
         elif len(data) <= 3:
             return(jsonify({'status' : 400, 'message' : 'too little parameters to update'}), 400)
-        conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) ; conn.execute('USE DATABASE lf_project_store') ; cursor = conn.cursor()
+        conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) 
+        conn.execute('USE DATABASE lf_project_store') 
+        cursor = conn.cursor()
         colnames, values = [i for i in list(data.keys()) if i != 'access_key'], [str(i) for i in list(data.values())[1:]]
         data = dict(zip(colnames, values))
 
@@ -86,7 +90,9 @@ def delete_patient():
             return(jsonify({'status' : 403, 'message' : 'incorrect / missing access key'}), 403)
         elif len(data) > 3:
             return(jsonify({'status' : 400, 'message' : 'too many parameters to work with'}), 400)
-        conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) ; cursor = conn.cursor()
+        conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) 
+        conn.execute('USE DATABASE lf_project_store')
+        cursor = conn.cursor()
         
         # Find the appropriate ROWID here:
         cursor.execute('SELECT ROWID, patient_name, patient_nric FROM "Patient Information"') ; fetched = cursor.fetchall()
@@ -107,13 +113,15 @@ def delete_patient():
 @db.route('/delete_records', methods = ['DELETE'])
 def delete_records():
     '''
-    Deletes the entire database so that the user can start anew.
+    Clears the entire database (in case there's ever need to empty the cup out to speak of).
     '''
     data = request.get_json()
     if data.get('access_key') != os.getenv('ACCESS_KEY') and data.get('ENCRYPTION_KEY') != os.getenv('ENCRYPTION_KEY'):
         return(jsonify({'status' : 403, 'message' : 'incorrect / missing access key and / or encryption key.'}))
     try:
-        conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) ; cursor = conn.cursor()
+        conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) 
+        conn.execute('USE DATABASE lf_project_store')
+        cursor = conn.cursor()
         cursor.execute('DELETE FROM "Patient Information"')
         conn.commit() ; conn.close()
         return(jsonify({'status' : 200, 'message' : 'table successfully cleared'}))
