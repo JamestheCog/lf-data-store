@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask
 
 # Import the routes here:
 from routes.db import db
