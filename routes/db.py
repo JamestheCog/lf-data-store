@@ -29,7 +29,7 @@ def post_information():
     FERNET key for encrypting responses.
     '''
     try:
-        data = request.get_json() ; password = data.get('authorization', dict()) ; password = password.get('password', None)
+        data = request.get_json() ; print(type(data)) ; password = data.get('authorization', dict()).get('password', None)
         if password is None or password != os.getenv('PASSWORD'):
             return(jsonify({'status_code' : 403, 'message' : 'incorrect / missing password'}), 403)
         conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) 
