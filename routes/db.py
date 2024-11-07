@@ -50,7 +50,7 @@ def update_information():
     to be supplied:
     '''
     try:
-        data = json.loads(request.get_json()) ; password = data.get('authorization', dict()).get('password', None)
+        data = request.get_json() ; password = data.get('authorization', dict()).get('password', None)
         if password is None or password != os.getenv('PASSWORD'):
             return(jsonify({'status_code' : 403, 'message' : 'incorrect / missing password'}), 403)
         elif len(data.get('data')) <= 2:
@@ -85,7 +85,7 @@ def delete_patient():
     Given a patient's NRIC and Name, delete them from the database:
     '''
     try:
-        data = json.loads(request.get_json()) ; password = data.get('authorization', dict()).get('password', None)
+        data = request.get_json() ; password = data.get('authorization', dict()).get('password', None)
         if password is None or password != os.getenv('PASSWORD'):
             return(jsonify({'status_code' : 403, 'message' : 'incorrect / missing password'}), 403)
         elif len(data.get('data')) > 3:
