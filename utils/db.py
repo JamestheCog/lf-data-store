@@ -4,9 +4,9 @@ A module for storing functions and other constants (if need be) for fetching dat
 
 import os, sqlitecloud
 
-def fetch_data(access_key, fernet_key):
+def fetch_data(access_key):
     '''
-    Given an access key and a Fernet key for decrypting the database, fetch and decrypt 
+    Given a password for decrypting the database, fetch and decrypt 
     the database's fields.  
     
     If the access and decryption are successful, return a list of dictionaries 
@@ -14,12 +14,13 @@ def fetch_data(access_key, fernet_key):
     and error message.
     '''
     try:
-        if access_key != os.getenv('ACCESS_KEY'):
-            return({'status' : 403, 'message' : 'incorrect / missing access key'})
-        elif fernet_key != os.getenv('ENCRYPTION_KEY'):
-            return({'status' : 403, 'message' : 'incorrect / missing encryption key'})
-        conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) ; conn.execute(f'USE DATABASE lf_project_store')
-        cursor = conn.cursor() ; cursor.execute('SELECT * FROM "Patient Information"')
+        if access_key != os.getenv('PASSWORD'):
+            return({'status' : 403, 'message' : 'incorrect / missing password'})
+        # Fetch data here;
+        conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) 
+        conn.execute(f'USE DATABASE lf_project_store')
+        cursor = conn.cursor() 
+        cursor.execute('SELECT * FROM "Patient Information"')
         results, colnames = cursor.fetchall(), [i[0].lower() for i in cursor.execute('SELECT * FROM "Patient Information" LIMIT 1').description]
         conn.close()
         return([dict(zip(colnames, i)) for i in results], 200)

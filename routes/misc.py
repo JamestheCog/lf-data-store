@@ -8,4 +8,7 @@ misc = Blueprint('misc', __name__)
 
 @misc.route('/ping', methods = ['GET'])
 def ping():
+    '''
+    For a chron job to use; returns the string 'pong' and an "ok" status code.
+    '''
     return('pong', 200)

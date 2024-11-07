@@ -19,7 +19,7 @@ def fetch_information():
     return an error and do not return any data.
     '''
     data = request.get_json()
-    results, code = db_funcs.fetch_data(data['access_key'], data['encryption_key'])
+    results, code = db_funcs.fetch_data(data.get('authorization', dict()).get('password'))
     return(jsonify(results), code)
 
 @db.route('/post_information', methods = ['POST'])
@@ -29,9 +29,9 @@ def post_information():
     FERNET key for encrypting responses.
     '''
     try:
-        data = request.get_json()
-        if data.get('access_key') is None or data.get('access_key') != os.getenv('ACCESS_KEY'):
-            return(jsonify({'status_code' : 403, 'message' : 'incorrect / missing access key'}), 403)
+        data = request.get_json() ; password = data.get('authorization', dict()).get('password', None)
+        if password is None or password != os.getenv('PASSWORD'):
+            return(jsonify({'status_code' : 403, 'message' : 'incorrect / missing password'}), 403)
         conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) 
         conn.execute('USE DATABASE lf_project_store') 
         cursor = conn.cursor() 
@@ -50,10 +50,10 @@ def update_information():
     to be supplied:
     '''
     try:
-        data = request.get_json()
-        if data.get('access_key') is None or data.get('access_key') != os.getenv('ACCESS_KEY'):
-            return(jsonify({'status' : 403, 'message' : 'incorrect / missing access key'}), 403)
-        elif len(data) <= 3:
+        data = request.get_json() ; password = data.get('authorization', dict()).get('password', None)
+        if password is None or password != os.getenv('PASSWORD'):
+            return(jsonify({'status_code' : 403, 'message' : 'incorrect / missing password'}), 403)
+        elif len(data.get('data')) <= 2:
             return(jsonify({'status' : 400, 'message' : 'too little parameters to update'}), 400)
         conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) 
         conn.execute('USE DATABASE lf_project_store') 
@@ -64,7 +64,7 @@ def update_information():
         # Find the appropriate ROWID here:
         cursor.execute('SELECT ROWID, patient_name, patient_nric FROM "Patient Information"') ; fetched = cursor.fetchall()
         row_ids, names, nrics = [list(map(lambda x : x[i], fetched)) for i in range(3)]
-        row_id = list({i for i, v in enumerate(names) if v == data['patient_name']} & {i for i, v in enumerate(nrics) if v == data['patient_nric']})[0]
+        row_id = list({i for i, v in enumerate(names) if v == data.get('data')['patient_name']} & {i for i, v in enumerate(nrics) if v == data.get('data')['patient_nric']})[0]
         
         # Do the updating here:
         to_update_keys = list(data.keys())[2:] ; to_update = [data[i] for i in to_update_keys]
@@ -85,10 +85,10 @@ def delete_patient():
     Given a patient's NRIC and Name, delete them from the database:
     '''
     try:
-        data = request.get_json()
-        if data.get('access_key') is None or data.get('access_key') != os.getenv('ACCESS_KEY'):
-            return(jsonify({'status' : 403, 'message' : 'incorrect / missing access key'}), 403)
-        elif len(data) > 3:
+        data = request.get_json() ; password = data.get('authorization', dict()).get('password', None)
+        if password is None or password != os.getenv('PASSWORD'):
+            return(jsonify({'status_code' : 403, 'message' : 'incorrect / missing password'}), 403)
+        elif len(data.get('data')) > 3:
             return(jsonify({'status' : 400, 'message' : 'too many parameters to work with'}), 400)
         conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) 
         conn.execute('USE DATABASE lf_project_store')
@@ -97,7 +97,7 @@ def delete_patient():
         # Find the appropriate ROWID here:
         cursor.execute('SELECT ROWID, patient_name, patient_nric FROM "Patient Information"') ; fetched = cursor.fetchall()
         row_ids, names, nrics = [list(map(lambda x : x[i], fetched)) for i in range(3)]
-        row_id = list({i for i, v in enumerate(names) if v == data['patient_name']} & {i for i, v in enumerate(nrics) if v == data['patient_nric']})[0]
+        row_id = list({i for i, v in enumerate(names) if v == data.get('data')['patient_name']} & {i for i, v in enumerate(nrics) if v == data.get('data')['patient_nric']})[0]
 
         # Do the deletion here:
         cursor.execute('DELETE FROM "Patient Information" WHERE ROWID = ?', (row_ids[row_id], ))
@@ -114,10 +114,12 @@ def delete_patient():
 def delete_records():
     '''
     Clears the entire database (in case there's ever need to empty the cup out to speak of).
+
+    UPDATE (Thursday, 7th November, 2024): this function is currently not being used.
     '''
-    data = request.get_json()
-    if data.get('access_key') != os.getenv('ACCESS_KEY') and data.get('ENCRYPTION_KEY') != os.getenv('ENCRYPTION_KEY'):
-        return(jsonify({'status' : 403, 'message' : 'incorrect / missing access key and / or encryption key.'}))
+    data = request.get_json() ; password = data.get('authorization', dict()).get('password', None)
+    if password is None or password != os.getenv('PASSWORD'):
+        return(jsonify({'status_code' : 403, 'message' : 'incorrect / missing password'}), 403)
     try:
         conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) 
         conn.execute('USE DATABASE lf_project_store')
