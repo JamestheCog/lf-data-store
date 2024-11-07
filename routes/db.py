@@ -36,7 +36,7 @@ def post_information():
         conn.execute('USE DATABASE lf_project_store') 
         cursor = conn.cursor() 
         colnames = [i[0] for i in cursor.execute('SELECT * FROM "Patient Information" LIMIT 1').description]
-        enc_data = tuple([data[i] for i in colnames])
+        enc_data = tuple([data.get('data')[i] for i in colnames])
         cursor.execute(f'INSERT INTO "Patient Information" ({", ".join(colnames)}) VALUES ({", ".join(["?"] * len(enc_data))})', enc_data) 
         conn.commit() ; conn.close()
         return(jsonify({'status' : 200, 'message' : 'data successfully inserted'}), 200)
@@ -58,7 +58,7 @@ def update_information():
         conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) 
         conn.execute('USE DATABASE lf_project_store') 
         cursor = conn.cursor()
-        colnames, values = [i for i in list(data.keys()) if i != 'access_key'], [str(i) for i in list(data.values())[1:]]
+        colnames, values = [i for i in list(data.get('data').keys()) if i != 'access_key'], [str(i) for i in list(data.get('data').values())[1:]]
         data = dict(zip(colnames, values))
 
         # Find the appropriate ROWID here:
@@ -67,7 +67,7 @@ def update_information():
         row_id = list({i for i, v in enumerate(names) if v == data.get('data')['patient_name']} & {i for i, v in enumerate(nrics) if v == data.get('data')['patient_nric']})[0]
         
         # Do the updating here:
-        to_update_keys = list(data.keys())[2:] ; to_update = [data[i] for i in to_update_keys]
+        to_update_keys = list(data.get('data').keys())[2:] ; to_update = [data.get('data')[i] for i in to_update_keys]
         cursor.execute(f'UPDATE "Patient Information" SET {", ".join([f"{i} = ?" for i in to_update_keys])} WHERE ROWID = ?',
                        tuple(to_update + [row_ids[row_id]]))
         conn.commit() ; conn.close()
