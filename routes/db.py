@@ -18,7 +18,7 @@ def fetch_information():
     Tries to fetch information from the database provided that the access password has been given.  If not,
     return an error and do not return any data.
     '''
-    data = json.loads(request.get_json())
+    data = request.get_json()
     results, code = db_funcs.fetch_data(data.get('authorization', dict()).get('password'))
     return(jsonify(results), code)
 
@@ -29,7 +29,7 @@ def post_information():
     FERNET key for encrypting responses.
     '''
     try:
-        data = json.loads(request.get_json()) ; password = data.get('authorization', dict()).get('password', None)
+        data = request.get_json() ; password = data.get('authorization', dict()).get('password', None)
         if password is None or password != os.getenv('PASSWORD'):
             return(jsonify({'status_code' : 403, 'message' : 'incorrect / missing password'}), 403)
         conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) 
@@ -50,7 +50,7 @@ def update_information():
     to be supplied:
     '''
     try:
-        data = json.loads(request.get_json()) ; password = data.get('authorization', dict()).get('password', None)
+        data = request.get_json() ; password = data.get('authorization', dict()).get('password', None)
         if password is None or password != os.getenv('PASSWORD'):
             return(jsonify({'status_code' : 403, 'message' : 'incorrect / missing password'}), 403)
         elif len(data.get('data')) <= 2:
@@ -85,7 +85,7 @@ def delete_patient():
     Given a patient's NRIC and Name, delete them from the database:
     '''
     try:
-        data = json.loads(request.get_json()) ; password = data.get('authorization', dict()).get('password', None)
+        data = request.get_json() ; password = data.get('authorization', dict()).get('password', None)
         if password is None or password != os.getenv('PASSWORD'):
             return(jsonify({'status_code' : 403, 'message' : 'incorrect / missing password'}), 403)
         elif len(data.get('data')) > 3:
@@ -117,7 +117,7 @@ def delete_records():
 
     UPDATE (Thursday, 7th November, 2024): this function is currently not being used.
     '''
-    data = json.loads(request.get_json()) ; password = data.get('authorization', dict()).get('password', None)
+    data = request.get_json() ; password = data.get('authorization', dict()).get('password', None)
     if password is None or password != os.getenv('PASSWORD'):
         return(jsonify({'status_code' : 403, 'message' : 'incorrect / missing password'}), 403)
     try:
