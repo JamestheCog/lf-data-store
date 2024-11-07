@@ -18,7 +18,7 @@ def fetch_information():
     Tries to fetch information from the database provided that the access password has been given.  If not,
     return an error and do not return any data.
     '''
-    data = json.loads(request.get_json())
+    data = request.get_json()
     results, code = db_funcs.fetch_data(data.get('authorization', dict()).get('password'))
     return(jsonify(results), code)
 
