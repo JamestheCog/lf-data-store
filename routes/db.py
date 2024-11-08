@@ -41,7 +41,7 @@ def post_information():
         conn.commit() ; conn.close()
         return(jsonify({'status' : 200, 'message' : 'data successfully inserted'}), 200)
     except (Exception, sqlitecloud.Error) as e:
-        return(jsonify({'status' : 500, 'message' : str(e)}), 500)
+        return(jsonify({'status' : 500, 'message' : str(e), 'raw_data' : request.get_json()}), 500)
     
 @db.route('/update_information', methods = ['PUT'])
 def update_information():
