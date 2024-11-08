@@ -58,8 +58,8 @@ def update_information():
         conn = sqlitecloud.connect(os.getenv('CONNECTION_STRING')) 
         conn.execute('USE DATABASE lf_project_store') 
         cursor = conn.cursor()
-        colnames, values = [i for i in list(data.get('data').keys()) if i != 'access_key'], [str(i) for i in list(data.get('data').values())[1:]]
-        data = dict(zip(colnames, values))
+        # colnames, values = [i for i in list(data.get('data').keys()) if i != 'access_key'], [str(i) for i in list(data.get('data').values())[1:]]
+        # data = dict(zip(colnames, values))
 
         # Find the appropriate ROWID here:
         cursor.execute('SELECT ROWID, patient_name, patient_nric FROM "Patient Information"') ; fetched = cursor.fetchall()
